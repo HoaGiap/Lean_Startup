@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khởi Nghiệp Tinh Gọn (Lean Startup) - Dashboard Học Tập</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        .card-hover {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-circle {
+            transition: all 0.3s ease;
+        }
+
+        .step-active {
+            transform: scale(1.1);
+            border-color: #f97316;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.3);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals with Orange/Blue Accents (Professional & Energetic) -->
+    <!-- Application Structure Plan:
+         1. Hero Section: Title & Introduction.
+         2. Comparison Dashboard: Interactive Toggle & Chart comparing Traditional vs. Lean models (Risk/Learning).
+         3. The Loop (Build-Measure-Learn): Interactive 3-step cycle where users click to see details of each phase.
+         4. MVP Showcase: Definition + 3 Card Carousel of IT examples + Personal 1-hour MVP Example.
+         5. Hypothesis & Pivot Lab: Interactive scenarios explaining when to pivot based on hypothesis validation.
+         This structure moves from theory (Comparison) to process (The Loop) to practice (MVP) to decision making (Pivot), guiding the student logically.
+    -->
+    <!-- Visualization & Content Choices:
+         1. Comparison: Chart.js Line Chart showing "Risk vs. Time" to visualize the fail-fast benefit.
+         2. Process: HTML/CSS Circular Flow for Build-Measure-Learn.
+         3. Examples: Grid layout for MVP examples.
+         4. Logic: JS-driven text updates for definitions and Pivot scenarios.
+         5. No SVG/Mermaid: Using CSS shapes and Unicode/Emoji for icons.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+
+<body class="bg-slate-50">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-2xl font-bold text-slate-800">🚀 Lean<span
+                            class="text-orange-500">Startup</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="scrollToSection('intro')"
+                        class="text-slate-600 hover:text-orange-500 font-medium transition">Tổng quan</button>
+                    <button onclick="scrollToSection('process')"
+                        class="text-slate-600 hover:text-orange-500 font-medium transition">Quy trình</button>
+                    <button onclick="scrollToSection('mvp')"
+                        class="text-slate-600 hover:text-orange-500 font-medium transition">MVP</button>
+                    <button onclick="scrollToSection('pivot')"
+                        class="text-slate-600 hover:text-orange-500 font-medium transition">Pivot</button>
+                </div>
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button onclick="toggleMobileMenu()" class="text-slate-600 hover:text-slate-900 focus:outline-none">
+                        ☰
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <button onclick="scrollToSection('intro')"
+                    class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-100">Tổng
+                    quan</button>
+                <button onclick="scrollToSection('process')"
+                    class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-100">Quy
+                    trình</button>
+                <button onclick="scrollToSection('mvp')"
+                    class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-100">MVP</button>
+                <button onclick="scrollToSection('pivot')"
+                    class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-slate-100">Pivot</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="intro" class="bg-white pt-16 pb-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight mb-4">
+                Khởi nghiệp Tinh gọn vs Truyền thống
+            </h1>
+            <p class="text-xl text-slate-500 max-w-3xl mx-auto">
+                Một cách tiếp cận khoa học để tạo ra và quản lý các công ty khởi nghiệp nhằm đưa sản phẩm mong muốn đến
+                tay khách hàng nhanh hơn.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-16">
+
+        <!-- SECTION 1: Lean vs Traditional -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-8 border-b border-slate-100">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">1. Lean Startup khác gì Startup Truyền thống?</h2>
+                <p class="text-slate-600">
+                    Sự khác biệt cốt lõi nằm ở cách tiếp cận rủi ro và lập kế hoạch. Thay vì lập kế hoạch hoàn hảo, Lean
+                    Startup tập trung vào học hỏi và thích nghi.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
+                <!-- Text Comparison -->
+                <div class="p-8 bg-slate-50">
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-white p-1 rounded-lg border border-slate-200 inline-flex">
+                            <button onclick="setComparisonMode('traditional')" id="btn-trad"
+                                class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-slate-100 text-slate-500 hover:text-slate-900">Truyền
+                                thống (Waterfall)</button>
+                            <button onclick="setComparisonMode('lean')" id="btn-lean"
+                                class="px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 shadow-sm">Lean
+                                (Tinh gọn)</button>
+                        </div>
+                    </div>
+
+                    <div id="comparison-content" class="space-y-4">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Chart Visualization -->
+                <div class="p-8 flex flex-col justify-center items-center bg-white border-l border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-4">Mô hình Giảm thiểu Rủi ro</h3>
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                    <p class="text-xs text-center text-slate-400 mt-2">Biểu đồ thể hiện mức độ rủi ro theo thời gian
+                        giữa hai mô hình.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Build - Measure - Learn -->
+        <section id="process" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">2. Quy trình Build - Measure - Learn</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">
+                    Vòng lặp phản hồi cốt lõi của khởi nghiệp tinh gọn. Mục tiêu là đi qua vòng lặp này càng nhanh càng
+                    tốt.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <!-- Interactive Cycle Diagram -->
+                <div class="lg:col-span-1 flex flex-col items-center justify-center space-y-4 relative">
+                    <!-- Build -->
+                    <div onclick="showStep('build')" id="step-build"
+                        class="step-circle w-32 h-32 rounded-full border-4 border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 bg-blue-50 border-blue-500">
+                        <span class="text-3xl">🔨</span>
+                        <span class="font-bold text-slate-700">BUILD</span>
+                        <span class="text-xs text-slate-500">(Xây dựng)</span>
+                    </div>
+                    <div class="h-8 w-1 bg-slate-300"></div>
+                    <!-- Measure -->
+                    <div onclick="showStep('measure')" id="step-measure"
+                        class="step-circle w-32 h-32 rounded-full border-4 border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50">
+                        <span class="text-3xl">📊</span>
+                        <span class="font-bold text-slate-700">MEASURE</span>
+                        <span class="text-xs text-slate-500">(Đo lường)</span>
+                    </div>
+                    <div class="h-8 w-1 bg-slate-300"></div>
+                    <!-- Learn -->
+                    <div onclick="showStep('learn')" id="step-learn"
+                        class="step-circle w-32 h-32 rounded-full border-4 border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50">
+                        <span class="text-3xl">🧠</span>
+                        <span class="font-bold text-slate-700">LEARN</span>
+                        <span class="text-xs text-slate-500">(Học hỏi)</span>
+                    </div>
+                </div>
+
+                <!-- Description Panel -->
+                <div
+                    class="lg:col-span-2 bg-slate-50 rounded-xl p-8 border border-slate-200 min-h-[300px] flex flex-col justify-center">
+                    <div id="bml-content">
+                        <!-- Content injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MVP -->
+        <section id="mvp" class="space-y-8">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">3. MVP là gì? (Minimum Viable Product)</h2>
+                <p class="text-slate-600 mb-6">
+                    Sản phẩm khả dụng tối thiểu là phiên bản sản phẩm có vừa đủ tính năng để thu hút những khách hàng
+                    đầu tiên và kiểm chứng giả thuyết sản phẩm.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Example 1 -->
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 card-hover">
+                        <div class="text-4xl mb-4">📦</div>
+                        <h3 class="font-bold text-lg text-slate-800">Dropbox</h3>
+                        <p class="text-sm text-slate-500 mt-1">Loại MVP: Video Demo</p>
+                        <p class="text-slate-700 mt-3 text-sm">
+                            Thay vì xây dựng hệ thống đồng bộ hóa phức tạp ngay lập tức, Drew Houston đã làm một
+                            <strong>video 3 phút</strong> giải thích cách nó hoạt động. Kết quả: danh sách chờ tăng từ
+                            5k lên 75k người qua đêm.
+                        </p>
+                    </div>
+                    <!-- Example 2 -->
+                    <div class="bg-orange-50 p-6 rounded-xl border border-orange-100 card-hover">
+                        <div class="text-4xl mb-4">👟</div>
+                        <h3 class="font-bold text-lg text-slate-800">Zappos</h3>
+                        <p class="text-sm text-slate-500 mt-1">Loại MVP: Concierge (Thủ công)</p>
+                        <p class="text-slate-700 mt-3 text-sm">
+                            Nick Swinmurn không nhập hàng. Anh đến cửa hàng giày địa phương, <strong>chụp ảnh
+                                giày</strong> và đăng lên web. Khi có người mua, anh ra cửa hàng mua và gửi đi. Kiểm
+                            chứng: Người ta có mua giày online không?
+                        </p>
+                    </div>
+                    <!-- Example 3 -->
+                    <div class="bg-green-50 p-6 rounded-xl border border-green-100 card-hover">
+                        <div class="text-4xl mb-4">👥</div>
+                        <h3 class="font-bold text-lg text-slate-800">Facebook</h3>
+                        <p class="text-sm text-slate-500 mt-1">Loại MVP: Tính năng cốt lõi</p>
+                        <p class="text-slate-700 mt-3 text-sm">
+                            Phiên bản đầu "Thefacebook" chỉ dành cho sinh viên Harvard. Không có News Feed, không có
+                            Like, không có ảnh tường. Chỉ là một <strong>thư mục (directory)</strong> kết nối sinh viên
+                            cùng trường.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal MVP Example -->
+            <div class="bg-indigo-900 rounded-2xl shadow-lg p-8 text-white relative overflow-hidden">
+                <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="md:col-span-2">
+                        <h3 class="text-xl font-bold text-yellow-400 mb-2">⚡ Thử thách: MVP trong 1-2 giờ</h3>
+                        <p class="text-indigo-200 mb-4">Một ví dụ thực tế bạn có thể làm ngay cho bài tập nhóm.</p>
+                        <div class="bg-white/10 p-6 rounded-lg backdrop-blur-sm border border-white/20">
+                            <h4 class="font-bold text-lg mb-2">Ý tưởng: Dịch vụ tìm người ở ghép (Roommate Finder) cho
+                                sinh viên trường.</h4>
+                            <ul class="space-y-3 text-sm text-indigo-100">
+                                <li class="flex items-start"><span class="mr-2">🛠️</span> <strong>Bước 1
+                                        (30p):</strong> Tạo Google Form thu thập thông tin: Tên, Thói quen, Mức giá, Khu
+                                    vực muốn thuê.</li>
+                                <li class="flex items-start"><span class="mr-2">🎨</span> <strong>Bước 2 (30p):</strong>
+                                    Tạo một Poster đơn giản trên Canva với QR Code trỏ về Google Form.</li>
+                                <li class="flex items-start"><span class="mr-2">📢</span> <strong>Bước 3 (15p):</strong>
+                                    Đăng Poster lên Group Facebook của trường hoặc dán ở bảng tin.</li>
+                                <li class="flex items-start"><span class="mr-2">🎯</span> <strong>Mục tiêu:</strong> Nếu
+                                    có > 20 người điền form trong 24h -> Có nhu cầu -> Mới bắt đầu viết App.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div
+                        class="hidden md:flex flex-col items-center justify-center p-4 bg-white/5 rounded-full aspect-square border-2 border-dashed border-white/20">
+                        <div class="text-5xl mb-2">⏱️</div>
+                        <div class="text-center font-bold">1 giờ</div>
+                        <div class="text-center text-xs text-indigo-300">Thời gian thực hiện</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Hypothesis & Pivot -->
+        <section id="pivot" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Hypothesis -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4">4. Giả thuyết (Hypothesis) là gì?</h2>
+                <div class="flex-grow space-y-4">
+                    <p class="text-slate-600">
+                        Là những dự đoán chưa được kiểm chứng mà startup dựa vào đó để phát triển. Nếu giả thuyết sai,
+                        startup có thể chết. Có 2 loại chính:
+                    </p>
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <h4 class="font-bold text-slate-800">1. Giả thuyết Giá trị (Value Hypothesis)</h4>
+                        <p class="text-sm text-slate-600">Sản phẩm có thực sự mang lại giá trị cho khách hàng không? Họ
+                            có muốn dùng nó không?</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <h4 class="font-bold text-slate-800">2. Giả thuyết Tăng trưởng (Growth Hypothesis)</h4>
+                        <p class="text-sm text-slate-600">Làm thế nào để người dùng mới biết đến sản phẩm? (Truyền
+                            miệng, quảng cáo, viral...)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pivot -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 flex flex-col">
+                <h2 class="text-2xl font-bold text-slate-800 mb-4">5. Khi nào Startup cần Pivot?</h2>
+                <p class="text-slate-600 mb-4">
+                    <strong>Pivot (Chuyển hướng)</strong> là thay đổi chiến lược nhưng giữ nguyên tầm nhìn. Xảy ra khi
+                    quy trình <em>Measure</em> và <em>Learn</em> cho thấy giả thuyết ban đầu là <strong>SAI</strong>.
+                </p>
+
+                <!-- Interactive Scenario -->
+                <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 flex-grow">
+                    <h4 class="font-bold text-slate-700 mb-3 border-b pb-2">🕹️ Mini-Game: Quyết định Pivot</h4>
+                    <p id="scenario-text" class="text-sm text-slate-600 mb-4 italic">
+                        "Bạn làm App đặt đồ ăn cho thú cưng. Sau 1 tháng, rất ít người đặt mua, NHƯNG họ lại chat rất
+                        nhiều để hỏi bác sĩ thú y tư vấn sức khỏe."
+                    </p>
+                    <div id="scenario-buttons" class="grid grid-cols-2 gap-3">
+                        <button onclick="checkPivot(false)"
+                            class="p-2 bg-white border border-slate-300 rounded hover:bg-slate-100 text-sm font-medium text-slate-700">Kiên
+                            trì bán đồ ăn</button>
+                        <button onclick="checkPivot(true)"
+                            class="p-2 bg-blue-600 border border-blue-700 rounded hover:bg-blue-700 text-sm font-medium text-white shadow-sm">Pivot
+                            sang Tư vấn</button>
+                    </div>
+                    <div id="scenario-result"
+                        class="hidden mt-4 p-3 bg-green-100 text-green-800 text-sm rounded border border-green-200">
+                        <!-- Result text -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-12 mt-16">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="mb-2 font-semibold text-white">Bài thuyết trình môn Khởi nghiệp & Đổi mới sáng tạo</p>
+            <p class="text-sm text-slate-500">Hoa Giáp - Huỳnh Sang - Văn Hoài</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA STORE ---
+        const comparisons = {
+            traditional: {
+                title: "Mô hình Truyền thống",
+                desc: "Thực hiện theo kế hoạch định sẵn, tuyến tính (Waterfall). Rủi ro dồn về cuối dự án.",
+                points: [
+                    "Kế hoạch kinh doanh dày cộp, chi tiết.",
+                    "Xây dựng sản phẩm hoàn thiện trong bí mật.",
+                    "Ra mắt hoành tráng (Big Bang Launch).",
+                    "Rủi ro: Làm ra thứ không ai cần sau 6-12 tháng."
+                ],
+                color: "slate"
+            },
+            lean: {
+                title: "Mô hình Tinh gọn (Lean)",
+                desc: "Vừa làm vừa điều chỉnh, vòng lặp. Rủi ro được chia nhỏ và kiểm chứng liên tục.",
+                points: [
+                    "Mô hình kinh doanh trên 1 trang giấy (Lean Canvas).",
+                    "Phát triển khách hàng song song phát triển sản phẩm.",
+                    "Ra mắt MVP sớm để học hỏi.",
+                    "Rủi ro: Giảm thiểu lãng phí nguồn lực."
+                ],
+                color: "blue"
+            }
+        };
+
+        const steps = {
+            build: {
+                title: "BUILD (Xây dựng)",
+                content: "Biến ý tưởng thành sản phẩm (MVP). Đừng xây dựng thứ hoàn hảo, hãy xây dựng thứ 'đủ dùng' để kiểm tra giả thuyết. Ví dụ: Tạo một Landing Page thay vì viết code cả ứng dụng.",
+                action: "Mục tiêu: Tốc độ."
+            },
+            measure: {
+                title: "MEASURE (Đo lường)",
+                content: "Thu thập dữ liệu từ phản hồi khách hàng. Dữ liệu định lượng (số lượt click, đăng ký) và định tính (phỏng vấn). Tránh các 'chỉ số phù phiếm' (Vanity Metrics) chỉ để làm đẹp báo cáo.",
+                action: "Mục tiêu: Dữ liệu trung thực."
+            },
+            learn: {
+                title: "LEARN (Học hỏi)",
+                content: "Phân tích dữ liệu để đưa ra quyết định: Giả thuyết đúng hay sai? Nên tiếp tục cải tiến (Persevere) hay thay đổi chiến lược (Pivot)? Đây là bước quan trọng nhất.",
+                action: "Mục tiêu: Nhận thức được kiểm chứng."
+            }
+        };
+
+        // --- INIT & EVENTS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initComparison();
+            initChart();
+            showStep('build'); // Default selection
+        });
+
+        // --- FUNCTIONS ---
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            // Close mobile menu if open
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Section 1: Comparison Logic
+        function setComparisonMode(mode) {
+            const contentDiv = document.getElementById('comparison-content');
+            const data = comparisons[mode];
+
+            // Toggle Button Styles
+            const btnTrad = document.getElementById('btn-trad');
+            const btnLean = document.getElementById('btn-lean');
+
+            if (mode === 'traditional') {
+                btnTrad.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors bg-slate-100 text-slate-900 shadow-sm";
+                btnLean.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors bg-white text-slate-500 hover:text-blue-700";
+            } else {
+                btnLean.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors bg-blue-100 text-blue-700 shadow-sm";
+                btnTrad.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors bg-white text-slate-500 hover:text-slate-900";
+            }
+
+            // Update Content
+            let html = `
+                <h4 class="text-xl font-bold text-${data.color === 'blue' ? 'blue-600' : 'slate-800'}">${data.title}</h4>
+                <p class="text-slate-600 italic">${data.desc}</p>
+                <ul class="space-y-2 mt-4">
+            `;
+            data.points.forEach(point => {
+                html += `<li class="flex items-start text-sm text-slate-700">
+                    <span class="mr-2 text-${data.color === 'blue' ? 'blue-500' : 'slate-400'}">●</span> ${point}
+                </li>`;
+            });
+            html += `</ul>`;
+
+            contentDiv.innerHTML = html;
+        }
+
+        function initComparison() {
+            setComparisonMode('lean'); // Default to Lean explanation
+        }
+
+        // Section 1: Chart Logic
+        function initChart() {
+            const ctx = document.getElementById('riskChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Start', 'Tháng 1', 'Tháng 3', 'Tháng 6', 'Tháng 9', 'Launch'],
+                    datasets: [
+                        {
+                            label: 'Startup Truyền thống (Rủi ro)',
+                            data: [10, 20, 30, 50, 80, 100], // Risk accumulates until launch
+                            borderColor: '#94a3b8', // slate-400
+                            borderDash: [5, 5],
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Lean Startup (Rủi ro)',
+                            data: [100, 80, 60, 40, 30, 20], // Risk decreases as we validate
+                            borderColor: '#3b82f6', // blue-500
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    if (context.dataset.label.includes('Truyền thống')) {
+                                        return 'Rủi ro tăng cao vì chưa kiểm chứng';
+                                    }
+                                    return 'Rủi ro giảm nhờ học hỏi liên tục';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Mức độ Rủi ro thất bại' },
+                            beginAtZero: true,
+                            max: 120
+                        },
+                        x: { display: false }
+                    }
+                }
+            });
+        }
+
+        // Section 2: Build-Measure-Learn Logic
+        function showStep(stepKey) {
+            // Update active circle visualization
+            ['build', 'measure', 'learn'].forEach(s => {
+                const el = document.getElementById(`step-${s}`);
+                if (s === stepKey) {
+                    el.classList.add('step-active', 'bg-blue-50', 'border-blue-500');
+                    el.classList.remove('border-slate-200');
+                } else {
+                    el.classList.remove('step-active', 'bg-blue-50', 'border-blue-500');
+                    el.classList.add('border-slate-200');
+                }
+            });
+
+            // Update Text Content
+            const data = steps[stepKey];
+            const contentDiv = document.getElementById('bml-content');
+
+            // Adding a simple fade effect
+            contentDiv.style.opacity = '0';
+            setTimeout(() => {
+                contentDiv.innerHTML = `
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                        ${data.title}
+                    </h3>
+                    <p class="text-lg text-slate-600 leading-relaxed mb-6">${data.content}</p>
+                    <div class="inline-block px-4 py-2 bg-slate-200 rounded-full text-slate-700 font-semibold text-sm">
+                        ${data.action}
+                    </div>
+                `;
+                contentDiv.style.opacity = '1';
+                contentDiv.style.transition = 'opacity 0.3s ease-in-out';
+            }, 100);
+        }
+
+        // Section 4: Pivot Scenario Logic
+        function checkPivot(choice) {
+            const resultDiv = document.getElementById('scenario-result');
+            const buttonsDiv = document.getElementById('scenario-buttons');
+
+            resultDiv.classList.remove('hidden');
+
+            if (choice) {
+                // Chose to Pivot
+                resultDiv.className = "mt-4 p-4 bg-green-50 text-green-800 text-sm rounded-lg border border-green-200 shadow-sm";
+                resultDiv.innerHTML = "<strong>✅ Chính xác!</strong> Đây gọi là <em>Zoom-in Pivot</em>. Dữ liệu cho thấy tính năng 'chat tư vấn' mới là thứ khách hàng cần, không phải mua đồ ăn. Bạn nên tập trung nguồn lực vào đó thay vì cố đấm ăn xôi.";
+            } else {
+                // Chose Not to Pivot
+                resultDiv.className = "mt-4 p-4 bg-red-50 text-red-800 text-sm rounded-lg border border-red-200 shadow-sm";
+                resultDiv.innerHTML = "<strong>❌ Nguy hiểm!</strong> Dữ liệu đã chỉ ra khách hàng KHÔNG mua đồ ăn (Value Hypothesis sai). Nếu tiếp tục, bạn sẽ cạn vốn. Hãy nhìn vào hành vi thực tế (họ thích chat) để chuyển hướng (Pivot).";
+            }
+        }
+
+    </script>
+</body>
+
+</html>
